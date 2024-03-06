@@ -320,6 +320,44 @@ const quizData = {
 bindQuizData(quizData);
 
 
+function showUserAnswersDialog(userAnswers) {
+  // Create modal dialog container
+  const dialogContainer = document.createElement('div');
+  dialogContainer.classList.add('modal');
+
+  // Create dialog content
+  const dialogContent = document.createElement('div');
+  dialogContent.classList.add('modal-content');
+
+  // Add close button
+  const closeButton = document.createElement('span');
+  closeButton.classList.add('close');
+  closeButton.innerHTML = '&times;';
+  closeButton.onclick = function() {
+    dialogContainer.style.display = 'none';
+  };
+  dialogContent.appendChild(closeButton);
+
+  // Add user answers to dialog content
+  const answersList = document.createElement('ul');
+  userAnswers.forEach((answer) => {
+    const answerItem = document.createElement('li');
+    answerItem.textContent = `${answer.question}: ${answer.userAnswer}`;
+    answersList.appendChild(answerItem);
+  });
+  dialogContent.appendChild(answersList);
+
+  // Append dialog content to container
+  dialogContainer.appendChild(dialogContent);
+
+  // Append dialog container to body
+  document.body.appendChild(dialogContainer);
+
+  // Display dialog
+  dialogContainer.style.display = 'block';
+}
+
+// Function to handle form submission
 // Function to handle form submission
 function handleSubmit(event) {
   event.preventDefault(); // Prevent default form submission behavior
@@ -369,16 +407,10 @@ function handleSubmit(event) {
   }
 
   // Check if there are unanswered questions
-  if (unansweredQuestions.length > 0) {
-    alert('Please answer all questions before submitting the form.');
-    return;
-  }
+  
 
-  // Log user's answers to the console
-  console.log('User Answers:', userAnswers);
-
-  // If all questions are answered, submit the form
-  form.submit();
+  // Show dialog with user answers
+  showUserAnswersDialog(userAnswers);
 }
 
 // Bind quiz data to the survey form on page load
