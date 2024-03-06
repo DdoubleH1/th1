@@ -319,34 +319,73 @@ const quizData = {
 
 bindQuizData(quizData);
 
-function saveUserAnswers() {
+
+// Function to handle form submission
+function handleSubmit(event) {
+  event.preventDefault(); // Prevent default form submission behavior
+
+  // Gather user's answers
   const userAnswers = [];
-  userAnswers.length = 0; // Clear the array before saving new answers
-  
-  quizData.questions.forEach((questionData, index) => {
-    const questionType = questionData.type;
-    const questionElement = document.querySelector(`[name="question${index}"]`);
 
-    if (questionType === 'boolean' || questionType === 'singleChoice') {
-      const selectedAnswer = questionElement.value;
-      userAnswers.push(selectedAnswer);
-    } else if (questionType === 'multipleChoice') {
-      const selectedAnswers = Array.from(questionElement)
-        .filter((input) => input.checked)
-        .map((input) => input.value);
-      userAnswers.push(selectedAnswers);
-    } else if (questionType === 'essay') {
-      const userAnswer = questionElement.value;
-      userAnswers.push(userAnswer);
+  const form = document.getElementById('survey-form');
+  const questions = form.getElementsByClassName('question');
+  let unansweredQuestions = [];
+
+  for (let i = 0; i < questions.length; i++) {
+    const questionData = quizData.questions[i];
+    const questionElement = questions[i];
+
+    let userAnswer;
+
+    if (questionData.type === 'boolean') {
+      const selectedOption = form.querySelector(`input[name="question${i}"]:checked`);
+      userAnswer = selectedOption ? selectedOption.value : 'Not answered';
+    } else if (questionData.type === 'singleChoice') {
+      const selectedOption = form.querySelector(`input[name="question${i}"]:checked`);
+      userAnswer = selectedOption ? selectedOption.value : 'Not answered';
+    } else if (questionData.type === 'multipleChoice') {
+      const checkboxes = questionElement.querySelectorAll(`input[name="question${i}-choice"]:checked`);
+      if (checkboxes.length > 0) {
+        userAnswer = [];
+        checkboxes.forEach((checkbox) => {
+          userAnswer.push(checkbox.value);
+        });
+      } else {
+        userAnswer = 'Not answered';
+        unansweredQuestions.push(questionData.question);
+      }
+    } else if (questionData.type === 'essay') {
+      userAnswer = form.querySelector(`textarea[name="question${i}-answer"]`).value.trim();
+      if (userAnswer === '') {
+        userAnswer = 'Not answered';
+        unansweredQuestions.push(questionData.question);
+      }
     }
-  });
 
-  console.log(userAnswers); // Log user answers to the console
+    userAnswers.push({
+      question: questionData.question,
+      userAnswer: userAnswer
+    });
+  }
+
+  // Check if there are unanswered questions
+  if (unansweredQuestions.length > 0) {
+    alert('Please answer all questions before submitting the form.');
+    return;
+  }
+
+  // Log user's answers to the console
+  console.log('User Answers:', userAnswers);
+
+  // If all questions are answered, submit the form
+  form.submit();
 }
 
+// Bind quiz data to the survey form on page load
+
+
+
 // Bind the saveUserAnswers function to the submit button click event
-const submitForm = document.getElementById('survey-form');
-submitForm.addEventListener('submit', (e) => {
-  e.preventDefault(); // Prevent page
-  saveUserAnswers();
-})
+const form = document.getElementById('survey-form');
+form.addEventListener('submit', handleSubmit);
+
